@@ -393,6 +393,29 @@ function returnStaged(staged: string, name: string): boolean {
 }
 
 /**
+ * Whether `destinationPath` is inside `sourcePath` or is `sourcePath` itself.
+ */
+function isInsideDirectory(
+  destinationPath: string,
+  sourcePath: string,
+  platform: string = process.platform,
+): boolean {
+  let normDest = path.resolve(destinationPath);
+  let normSource = path.resolve(sourcePath);
+  if (platform === "win32") {
+    normDest = normDest.toLowerCase();
+    normSource = normSource.toLowerCase();
+  }
+  if (normDest === normSource) {
+    return true;
+  }
+  const sourceWithSep = normSource.endsWith(path.sep)
+    ? normSource
+    : normSource + path.sep;
+  return normDest.startsWith(sourceWithSep);
+}
+
+/**
  * Rename `sourcePath` to `destinationPath`, keeping both inside their
  * validated directories. rename() takes two paths and Node has no
  * renameat(), so each rename can resolve only one side relative to an
@@ -419,6 +442,29 @@ export function renameIntoDirectory(
   const sourceDirectory = path.dirname(sourcePath);
   const name = path.basename(sourcePath);
   const destinationDirectory = path.dirname(destinationPath);
+
+  // Moving a directory into itself or a subdirectory of itself is invalid.
+  // Reject it up front before staging, otherwise renaming the source in step 1
+  // removes the destination's parent directory from under it and falsely reports
+  // "Parent directory does not exist" (#5555).
+  if (isInsideDirectory(destinationPath, sourcePath)) {
+    const isDir = inDirectory(sourceDirectory, () => {
+      try {
+        return fs.lstatSync(name).isDirectory();
+      } catch (error) {
+        throw namingPath(error, name, sourcePath);
+      }
+    });
+    if (isDir) {
+      throw Object.assign(
+        new Error(
+          `EINVAL: invalid argument, rename '${sourcePath}' -> '${destinationPath}'`,
+        ),
+        { code: "EINVAL", path: sourcePath, dest: destinationPath },
+      );
+    }
+  }
+
   const held = stagingName();
   const expected = inDirectory(sourceDirectory, () => {
     try {

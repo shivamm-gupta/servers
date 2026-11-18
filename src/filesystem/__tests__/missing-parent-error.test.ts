@@ -93,6 +93,19 @@ describe("a write into a missing directory (#5432)", () => {
     expect(await fs.readFile(source, "utf-8")).toBe("a");
   });
 
+  it("move_file refuses to move a directory into its own subtree (#5555)", async () => {
+    const sourceDir = path.join(dir, "mydir");
+    const subDir = path.join(sourceDir, "sub");
+    await fs.mkdir(subDir, { recursive: true });
+    const result = await call(client, "move_file", {
+      source: sourceDir,
+      destination: path.join(subDir, "nested"),
+    });
+    expect(result.isError).toBe(true);
+    expect(textOf(result)).toContain("EINVAL");
+    expect(textOf(result)).not.toContain("Parent directory does not exist");
+  });
+
   it("copy_file reports the destination's missing parent", async () => {
     const source = path.join(dir, "a.txt");
     await fs.writeFile(source, "a");

@@ -250,7 +250,7 @@ Files inside the allowed directories are also [resources](https://modelcontextpr
   - Inputs:
     - `source` (string)
     - `destination` (string)
-  - Fails if destination exists
+  - Fails if destination exists, or if destination is inside a source directory (cannot move a directory into itself or a subdirectory of itself)
   - Across filesystems (the source and destination on different mounts or
     disks), a regular file is moved by copying it to a newly created
     destination, with its permissions and modification time, and then removing

@@ -754,6 +754,22 @@ describe("renameIntoDirectory", () => {
       renameIntoDirectory(path.join(dir, "gone.txt"), path.join(dir, "b.txt")),
     ).toThrow(path.join(dir, "gone.txt"));
   });
+
+  it("refuses to move a directory into a subdirectory of itself (#5555)", () => {
+    const parent = path.join(dir, "parent");
+    const sub = path.join(parent, "sub");
+    fs.mkdirSync(sub, { recursive: true });
+    expect(() =>
+      renameIntoDirectory(parent, path.join(sub, "child")),
+    ).toThrow(
+      expect.objectContaining({
+        code: "EINVAL",
+        message: expect.stringContaining("EINVAL: invalid argument, rename"),
+      }),
+    );
+    expect(fs.existsSync(parent)).toBe(true);
+    expect(fs.existsSync(sub)).toBe(true);
+  });
 });
 
 // Each test here runs on one device: the helper is what moveFile falls back
