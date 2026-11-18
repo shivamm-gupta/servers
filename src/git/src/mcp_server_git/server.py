@@ -1383,7 +1383,10 @@ def create_server(repository: Path | None) -> MCPServer:
 
     @server.tool(
         name=GitTools.LOG.value,
-        description="Shows the commit logs",
+        description=(
+            "Shows the commit logs in reverse chronological order (newest first). "
+            "By default, returns the most recent commits from HEAD without requiring timestamp filters."
+        ),
         annotations=READ_ONLY,
         structured_output=False,
     )
@@ -1394,19 +1397,25 @@ def create_server(repository: Path | None) -> MCPServer:
             int,
             Field(
                 ge=1,
-                description="Maximum number of commits to show. Must be at least 1.",
+                description="Maximum number of commits to show (newest first). Must be at least 1.",
             ),
         ] = 10,
         start_timestamp: Annotated[
             str | None,
             Field(
-                description=f"Start timestamp for filtering commits. {TIMESTAMP_FORMATS}"
+                description=(
+                    "Optional start timestamp (earliest date) for filtering commits to a date range. "
+                    f"Leave empty to show recent commits. {TIMESTAMP_FORMATS}"
+                )
             ),
         ] = None,
         end_timestamp: Annotated[
             str | None,
             Field(
-                description=f"End timestamp for filtering commits. {TIMESTAMP_FORMATS}"
+                description=(
+                    "Optional end timestamp (latest date) for filtering commits to a date range. "
+                    f"Leave empty to show commits up to the newest. {TIMESTAMP_FORMATS}"
+                )
             ),
         ] = None,
     ) -> str:

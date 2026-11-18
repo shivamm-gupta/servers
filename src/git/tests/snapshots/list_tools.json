@@ -197,7 +197,7 @@
     },
     {
       "name": "git_log",
-      "description": "Shows the commit logs",
+      "description": "Shows the commit logs in reverse chronological order (newest first). By default, returns the most recent commits from HEAD without requiring timestamp filters.",
       "inputSchema": {
         "properties": {
           "repo_path": {
@@ -206,7 +206,7 @@
           },
           "max_count": {
             "default": 10,
-            "description": "Maximum number of commits to show. Must be at least 1.",
+            "description": "Maximum number of commits to show (newest first). Must be at least 1.",
             "minimum": 1,
             "title": "Max Count",
             "type": "integer"
@@ -221,7 +221,7 @@
               }
             ],
             "default": null,
-            "description": "Start timestamp for filtering commits. Accepts: ISO 8601 format (e.g., '2024-01-15T14:30:25'), relative dates (e.g., '2 weeks ago', 'yesterday'), or absolute dates (e.g., '2024-01-15', 'Jan 15 2024')",
+            "description": "Optional start timestamp (earliest date) for filtering commits to a date range. Leave empty to show recent commits. Accepts: ISO 8601 format (e.g., '2024-01-15T14:30:25'), relative dates (e.g., '2 weeks ago', 'yesterday'), or absolute dates (e.g., '2024-01-15', 'Jan 15 2024')",
             "title": "Start Timestamp"
           },
           "end_timestamp": {
@@ -234,7 +234,7 @@
               }
             ],
             "default": null,
-            "description": "End timestamp for filtering commits. Accepts: ISO 8601 format (e.g., '2024-01-15T14:30:25'), relative dates (e.g., '2 weeks ago', 'yesterday'), or absolute dates (e.g., '2024-01-15', 'Jan 15 2024')",
+            "description": "Optional end timestamp (latest date) for filtering commits to a date range. Leave empty to show commits up to the newest. Accepts: ISO 8601 format (e.g., '2024-01-15T14:30:25'), relative dates (e.g., '2 weeks ago', 'yesterday'), or absolute dates (e.g., '2024-01-15', 'Jan 15 2024')",
             "title": "End Timestamp"
           }
         },
